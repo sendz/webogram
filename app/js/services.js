@@ -1,5 +1,5 @@
 /*!
- * Webogram v0.5.7.1 - messaging web application for MTProto
+ * Webogram v0.6.0 - messaging web application for MTProto
  * https://github.com/zhukov/webogram
  * Copyright (C) 2014 Igor Zhukov <igor.beatle@gmail.com>
  * https://github.com/zhukov/webogram/blob/master/LICENSE
@@ -4342,7 +4342,14 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
   })
 
   .service('ChangelogNotifyService', function (Storage, $rootScope, $modal, $timeout, MtpApiManager, ApiUpdatesManager) {
+
+    var checked = false
+
     function checkUpdate () {
+      if (checked) {
+        return
+      }
+      checked = true
       MtpApiManager.getUserID().then(function (userID) {
         if (!userID) {
           return
@@ -4730,16 +4737,24 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           !target.onclick &&
           !target.onmousedown) {
           var href = $(target).attr('href') || target.href || ''
-          if (Config.Modes.chrome_packed && 
-              href.length &&
-              $(target).attr('target') == '_blank') {
-            $(target).attr('rel', '')
-          }
           var match = href.match(tgAddrRegExp)
           if (match) {
             if (handleTgProtoAddr(match[3], true)) {
               return cancelEvent(event)
             }
+          }
+        }
+      })
+
+      $(document).on('mousedown', function (event) {
+        var target = event.target
+        if (target &&
+            target.tagName == 'A') {
+          var href = $(target).attr('href') || target.href || ''
+          if (Config.Modes.chrome_packed && 
+              href.length &&
+              $(target).attr('target') == '_blank') {
+            $(target).attr('rel', '')
           }
         }
       })
@@ -4869,7 +4884,6 @@ angular.module('myApp.services', ['myApp.i18n', 'izhukov.utils'])
           // console.warn(dT(), 'server', draft)
         } else {
           // console.warn(dT(), 'local', draft)
-          console.warn(dT(), 'local', draft)
         }
         var replyToMsgID = draft && draft.replyToMsgID
         if (replyToMsgID) {
